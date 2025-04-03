@@ -1,83 +1,105 @@
-# **Book Recommendation Systems: Content-Based Filtering**  
+# **Book Recommendation System: Content-Based & Collaborative Filtering**  
 
 ![](image_cover.png)
 
 ## **INTRODUCTION**  
-With the increasing volume of books available online, manually selecting relevant books becomes challenging. **Content-Based Filtering** is a personalized recommendation approach that suggests books similar to those a user has liked based on their features.  
+With millions of books available, selecting the right one can be overwhelming. This project builds a **hybrid book recommendation system** using both:  
+- **Content-Based Filtering**: Recommends books based on their descriptions and metadata.  
+- **Collaborative Filtering**: Recommends books based on user interactions and ratings.  
 
-This project implements a **content-based book recommendation system** using the **Goodbooks-10k dataset**.  
+The dataset used is **Goodbooks-10k**, containing information about books, ratings, and reviews.  
 
 ---
 
 ## **PROBLEM STATEMENT**  
-Book lovers often struggle to find the next great read based on their preferences. The goal of this project is to:  
-- **Build a recommendation system that suggests books similar to a given book.**  
-- **Use natural language processing (NLP) techniques** to analyze book descriptions and metadata.  
-- **Evaluate the effectiveness of the recommendations.**  
+Many book enthusiasts struggle to find their next great read. This project aims to:  
+- **Develop two different recommendation approaches** (content-based & collaborative filtering).  
+- **Compare their effectiveness** in suggesting relevant books.  
+- **Provide insights into how recommendation models work.**  
 
 ---
 
 ## **SKILL DEMONSTRATION**  
-- **Text Data Processing (TF-IDF Vectorization)**  
-- **Cosine Similarity for Recommendation**  
-- **Content-Based Filtering Algorithm**  
-- **Recommendation System Implementation**  
+✔ **Natural Language Processing (TF-IDF)**  
+✔ **Cosine Similarity & Nearest Neighbors**  
+✔ **Collaborative Filtering using Matrix Factorization (SVD)**  
+✔ **Evaluation of Recommendation Systems**  
 
 ---
 
-## **DATA SOURCING**  
-The dataset used is **Goodbooks-10k**, which contains:  
-- **Book Titles**  
-- **Authors**  
-- **Genres**  
-- **User Ratings**  
-- **Book Descriptions**  
+# **METHOD 1: CONTENT-BASED FILTERING**  
+Content-based filtering recommends books by analyzing book descriptions.  
 
----
+### **Steps Involved:**  
+1. **Text Preprocessing**: Cleaning book descriptions.  
+2. **TF-IDF Vectorization**: Converting text into numerical form.  
+3. **Cosine Similarity**: Measuring similarity between books.  
+4. **Generating Recommendations**: Returning top N similar books.  
 
-## **DATA PREPROCESSING**  
-- **Text Cleaning:** Removing special characters and stopwords from book descriptions.  
-- **TF-IDF Vectorization:** Converting textual data into numerical form.  
-- **Cosine Similarity Computation:** Measuring book similarity based on vectorized features.  
-
-![](barchart.png)
-
-## **MODELLING: CONTENT-BASED FILTERING**  
-- **TF-IDF (Term Frequency-Inverse Document Frequency) Approach**  
-- **Similarity Matrix using Cosine Similarity**  
-- **Top N Book Recommendations for a Given Book**  
-
-### **Example Code for Book Recommendation**
+### **Implementation Example:**  
 ```python
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Convert book descriptions to TF-IDF vectors
 tfidf = TfidfVectorizer(stop_words='english')
 tfidf_matrix = tfidf.fit_transform(books['description'])
 
-# Compute similarity matrix
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-# Recommend books
 def get_recommendations(title, books_df, similarity_matrix):
     index = books_df[books_df['title'] == title].index[0]
     scores = list(enumerate(similarity_matrix[index]))
     scores = sorted(scores, key=lambda x: x[1], reverse=True)
-    top_books = [books_df.iloc[i[0]]['title'] for i in scores[1:6]]
-    return top_books
+    return [books_df.iloc[i[0]]['title'] for i in scores[1:6]]
 ```
 
 ---
 
-## **ANALYSIS & VISUALIZATION**  
-- **Word Cloud for Most Common Book Themes**  
-- **Distribution of Ratings Across Books**  
-- **Similarity Scores between Books**  
+# **METHOD 2: COLLABORATIVE FILTERING**  
+Collaborative filtering recommends books based on user preferences.  
+
+### **Techniques Used:**  
+1. **User-Based Filtering**: Suggests books based on similar user preferences.  
+2. **Item-Based Filtering**: Suggests books that are frequently rated together.  
+3. **Singular Value Decomposition (SVD)**: Matrix factorization for better recommendations.  
+
+### **Implementation Example (SVD - Model-Based Approach):**  
+```python
+from surprise import SVD
+from surprise import Dataset, Reader
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_df(books_ratings[['user_id', 'book_id', 'rating']], reader)
+
+trainset, testset = train_test_split(data, test_size=0.2)
+model = SVD()
+model.fit(trainset)
+
+predictions = model.test(testset)
+print("RMSE:", accuracy.rmse(predictions))
+```
+
+---
+
+## **EVALUATION & COMPARISON**  
+- **Content-Based Filtering**: Works well for recommending books similar to those a user already likes.  
+- **Collaborative Filtering**: Provides diverse recommendations but requires a large dataset of user ratings.  
+- **Hybrid Approach**: Combining both methods enhances recommendation accuracy.  
+
+---
+
+## **VISUALIZATIONS & INSIGHTS**  
+📊 **Word Cloud** of popular book descriptions  
+📈 **Distribution of User Ratings**  
+🔍 **Most Recommended Books by Both Models**  
+
+![](barchart.png)
 
 ---
 
 ## **CONCLUSION**  
-- **Content-based filtering successfully recommends books based on their descriptions.**  
-- **TF-IDF and Cosine Similarity provide a structured way to analyze textual data.**  
-- **The model can be expanded by integrating user preferences and collaborative filtering.**  
+- **Content-Based Filtering** is effective for users with few ratings.  
+- **Collaborative Filtering** provides personalized recommendations based on similar users.  
+- **Hybrid models combining both techniques improve accuracy.**  
